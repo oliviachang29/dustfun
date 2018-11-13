@@ -1,6 +1,6 @@
 function TestDust() {
   camera.position.y = 1;
-  camera.position.z = 2.5;
+  camera.position.z = 3;
 
   var bd = new b2BodyDef();
   var ground = world.CreateBody(bd);
@@ -42,12 +42,6 @@ function TestDust() {
 
   var pg = particleSystem.CreateParticleGroup(pgd);
 
-  // can we get it to not be a revolute joint?
-  var jd = new b2RevoluteJointDef();
-  jd.motorSpeed = 0;
-  jd.maxMotorTorque = 1e7;
-  jd.enableMotor = true;
-  this.joint = jd.InitializeAndCreate(ground, body, new b2Vec2(0, 1));
   this.time = 0;
 }
 
@@ -55,7 +49,7 @@ TestDust.prototype.Step = function() {
   world.Step(timeStep, velocityIterations, positionIterations);
   this.time += 1 / 60;
 
-  this.ball.position.Set(-2 + this.time, 0);
+  this.ball.position.Set(-2 + this.time*12, 0);
 
   console.log(this.particleSystem.GetPositionBuffer())
 }
