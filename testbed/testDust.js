@@ -5,6 +5,8 @@ function TestDust() {
   - create a new particle group def for each particle group
   */
 
+  this.time = 0;
+
   // set camera position
   camera.position.y = 0;
   camera.position.z = 3;
@@ -12,6 +14,17 @@ function TestDust() {
   // bd is a bodydef, not a real body, which all other bodies can be made from
   var bd = new b2BodyDef();
   var ground = world.CreateBody(bd);
+
+  bd.type = b2_dynamicBody;
+  bd.allowSleep = false;
+  bd.position.Set(0, 1);
+  var body = world.CreateBody(bd);
+
+  var ball = new b2CircleShape;
+  ball.position.Set(0, 0);
+  ball.radius = .2;
+  this.ball = ball;
+  body.CreateFixtureFromShape(ball, 1.0);
 
   // move this to a function later
   // ground
@@ -40,10 +53,17 @@ function TestDust() {
   vertices.push(new b2Vec2(4, 3));
   ground.CreateFixtureFromShape(rightSideBox, 0);
 
+  var roofBox = new b2PolygonShape();
+  var vertices = roofBox.vertices;
+  vertices.push(new b2Vec2(-4, 3));
+  vertices.push(new b2Vec2(4, 3));
+  vertices.push(new b2Vec2(4, 2));
+  vertices.push(new b2Vec2(-4, 2));
+  ground.CreateFixtureFromShape(roofBox, 0);
+
   // setup particles
   var psd = new b2ParticleSystemDef();
-  // size of individual particles
-  psd.radius = 0.025; 
+  psd.radius = 0.025; // size of individual particles
   // psd.dampingStrength = 0.2;
   var particleSystem = world.CreateParticleSystem(psd);
 
@@ -53,7 +73,8 @@ function TestDust() {
   circle.radius = 0.5;
   var pgd = new b2ParticleGroupDef();
   pgd.groupFlags = b2_rigidParticleGroup | b2_solidParticleGroup;
-  pgd.flags = b2_particleContactListenerParticle;
+  // pgd.flags = b2_solidParticleGroup;
+
   pgd.shape = circle;
   pgd.color.Set(255, 0, 0, 255);
   // make it move
@@ -65,13 +86,35 @@ function TestDust() {
   // ball.ApplyForce(f, p, true);
 
   // wall
-  var box = new b2PolygonShape();
+  var box1 = new b2PolygonShape();
   pgd = new b2ParticleGroupDef;
-  box.SetAsBoxXY(0.5, 2);
+  box1.SetAsBoxXY(0.5, 0.25);
+  pgd.strength = 1.0;
   pgd.groupFlags = b2_rigidParticleGroup;
-  pgd.flags = b2_particleContactListenerParticle;
-  pgd.position.Set(1,0);
-  pgd.shape = box;
+  pgd.flags = b2_wallParticle | b2_barrierParticle;
+  pgd.position.Set(1,-1.75);
+  pgd.shape = box1;
+  pgd.color.Set(0,0,255,255);
+  particleSystem.CreateParticleGroup(pgd);
+
+  var box2 = new b2PolygonShape();
+  pgd = new b2ParticleGroupDef;
+  box2.SetAsBoxXY(0.5, 0.75);
+  pgd.groupFlags = b2_rigidParticleGroup;
+  pgd.position.Set(1,-0.75);
+  pgd.shape = box2;
+  pgd.color.Set(0,0,100,255);
+  pgd.strength = 0;
+  this.box2 = particleSystem.CreateParticleGroup(pgd);
+
+  var box3 = new b2PolygonShape();
+  pgd = new b2ParticleGroupDef;
+  box3.SetAsBoxXY(0.5, 1);
+  pgd.strength = 1.0;
+  pgd.groupFlags = b2_rigidParticleGroup;
+  pgd.flags = b2_wallParticle | b2_barrierParticle;
+  pgd.position.Set(1,1);
+  pgd.shape = box3;
   pgd.color.Set(0,0,255,255);
   particleSystem.CreateParticleGroup(pgd);
 
@@ -90,6 +133,12 @@ TestDust.prototype.BeginContactBody = function(contact) {
 
 TestDust.prototype.Step = function() {
   world.Step(timeStep, velocityIterations, positionIterations);
+
+  this.time += 1/60
+
+  if (this.time == 2/60) {
+    // this.box2.flags = b2_powderParticle
+  }
 
   // if (this.contact) {
   //   console.log('this.contact')
