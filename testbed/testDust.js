@@ -76,6 +76,7 @@ function TestDust() {
   // pgd.flags = b2_solidParticleGroup;
 
   pgd.shape = circle;
+  pgd.strength = 1;
   pgd.color.Set(255, 0, 0, 255);
   // make it move
   pgd.linearVelocity = (new b2Vec2(180, -100)); // degrees, speed+direction
